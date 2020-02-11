@@ -1,8 +1,12 @@
 #include <iostream>
 #include <limits>
 
+//Work has been completed by Kapinos Daneel
+
+
 using namespace std;
 
+//output function
 template<typename T>
 void showMinMax() {
     cout << "min: " << numeric_limits<T>::min() << endl;
