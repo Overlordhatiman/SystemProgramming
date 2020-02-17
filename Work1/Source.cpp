@@ -1,39 +1,119 @@
 #include <iostream>
 #include <windows.h>
-#include <stdio.h>
-#include <tchar.h>
 #include <fstream>
-#include <string>
-#include <codecvt>
-#include <sstream>
 
 using namespace std;
 
-std::wstring readFile(const char* filename)
+//std::wstring readFile(const char* filename)
+//{
+//    std::wifstream wif(filename);
+//    wif.imbue(std::locale(std::locale::empty(), new std::codecvt_utf8<wchar_t>));
+//    std::wstringstream wss;
+//    wss << wif.rdbuf();
+//    return wss.str();
+//}
+//
+//std::string ConvertWideToANSI(const std::wstring& wstr)
+//{
+//    int num_chars = WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), wstr.length(), NULL, 0, NULL, NULL);
+//    std::string str;
+//    str.resize(num_chars);
+//    WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), -1, &str[0], wstr.length(), NULL, NULL);
+//    return str;
+//}
+//
+//std::wstring ConvertAnsiToWide(const std::string& str)
+//{
+//    int num_chars = MultiByteToWideChar(CP_ACP, 0, str.c_str(), str.length(), NULL, 0);
+//    std::wstring wstr;
+//    wstr.resize(num_chars);
+//    MultiByteToWideChar(CP_ACP, 0, str.c_str(), str.length(), &wstr[0], num_chars);
+//    return wstr;
+//}
+
+
+void ANSIToUnicode(HANDLE ReadF, HANDLE WriteF);
+void UnicodeToANSI(HANDLE ReadF, HANDLE WriteF);
+string GetLastErrorAsString();
+CHAR DataBuferOnMByte[(MAXBYTE) * sizeof(CHAR)] = { 0 };
+WCHAR DataBuferOnWChar[(MAXBYTE) * sizeof(WCHAR)] = { 0 };
+DWORD CountReadCh = 0;
+DWORD CountChangedCh = 0;
+DWORD CountWriteCh = 0;
+LPCWSTR fileANSII = L"ansii.txt";
+LPCWSTR fileWide = L"wide.txt";
+HANDLE ReadF;
+HANDLE WriteF;
+
+void clearing()
 {
-    std::wifstream wif(filename);
-    wif.imbue(std::locale(std::locale::empty(), new std::codecvt_utf8<wchar_t>));
-    std::wstringstream wss;
-    wss << wif.rdbuf();
-    return wss.str();
+    for (int i = 0; i < MAXBYTE * sizeof(CHAR); i++)
+    {
+        DataBuferOnMByte[i] = 0;
+    }
+    for (int i = 0; i < MAXBYTE * sizeof(WCHAR); i++)
+    {
+        DataBuferOnWChar[i] = 0;
+    }
 }
 
-std::string ConvertWideToANSI(const std::wstring& wstr)
+//ansi to utf
+void ANSIToUnicode(HANDLE ReadF, HANDLE WriteF)
 {
-    int num_chars = WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), wstr.length(), NULL, 0, NULL, NULL);
-    std::string str;
-    str.resize(num_chars);
-    WideCharToMultiByte(CP_ACP, 0, wstr.c_str(), -1, &str[0], wstr.length(), NULL, NULL);
-    return str;
+    clearing();
+    CountReadCh = 0;
+    CountChangedCh = 0;
+    CountWriteCh = 0;
+
+    do {
+        if (!ReadFile(ReadF, DataBuferOnMByte, (MAXBYTE - 1) * sizeof(CHAR), &CountReadCh, NULL))
+        {
+            cout << "Error: " << GetLastErrorAsString() << endl;
+            return;
+        }
+        CountChangedCh = MultiByteToWideChar(CP_ACP, 0, DataBuferOnMByte, -1, DataBuferOnWChar, CountReadCh * sizeof(WCHAR));
+        if (!WriteFile(WriteF, DataBuferOnWChar, (CountChangedCh - 1) * sizeof(WCHAR), &CountWriteCh, NULL))
+        {
+            cout << "Error: " << GetLastErrorAsString() << endl;
+            return;
+        }
+    } while (CountReadCh == MAXBYTE);
+    printf(("Transcoding complete.\n"));
 }
 
-std::wstring ConvertAnsiToWide(const std::string& str)
+//utf to ansi
+void UnicodeToANSI(HANDLE InF, HANDLE OutF)
 {
-    int num_chars = MultiByteToWideChar(CP_ACP, 0, str.c_str(), str.length(), NULL, 0);
-    std::wstring wstr;
-    wstr.resize(num_chars);
-    MultiByteToWideChar(CP_ACP, 0, str.c_str(), str.length(), &wstr[0], num_chars);
-    return wstr;
+    clearing();
+    CountReadCh = 0;
+    CountChangedCh = 0;
+    CountWriteCh = 0;
+    if (!ReadFile(InF, DataBuferOnWChar, 2, &CountReadCh, NULL))
+    {
+        cout << "Error: " << GetLastErrorAsString() << endl;
+    }
+    else if (*DataBuferOnWChar == 0xFEFF || *DataBuferOnWChar == 0xFFFE)
+    {
+        do {
+            if (!ReadFile(InF, DataBuferOnWChar, (MAXBYTE - 1) * sizeof(WCHAR), &CountReadCh, NULL))
+            {
+                cout << "Error: " << GetLastErrorAsString() << endl;
+                return;
+            }
+            CountChangedCh = WideCharToMultiByte(CP_MACCP, 0, DataBuferOnWChar, -1, DataBuferOnMByte, CountReadCh, NULL, NULL);
+            if (!WriteFile(OutF, DataBuferOnMByte, CountChangedCh - 1, &CountWriteCh, NULL))
+            {
+                cout << "Error: " << GetLastErrorAsString() << endl;
+                return;
+            }
+        } while (CountReadCh == MAXBYTE);
+        printf(("Transcoding complete.\n"));
+    }
+    else
+    {
+        printf(("Error:\n"));
+        printf(("It`s not Unicode Text!\n"));
+    }
 }
 
 inline constexpr std::uint32_t str2int(const char* str, std::uint32_t hash = 2166136261UL) {
@@ -57,6 +137,37 @@ std::string GetLastErrorAsString()
     return message;
 }
 
+bool CreateFileForWork()
+{
+    ReadF = CreateFile(fileANSII,
+        GENERIC_READ,
+        FILE_SHARE_READ,
+        NULL,
+        OPEN_EXISTING,
+        FILE_ATTRIBUTE_NORMAL,
+        NULL);
+
+    if (ReadF == INVALID_HANDLE_VALUE) {
+        cout << "Error input file : ";
+        cout << "Error: " << GetLastErrorAsString() << endl;
+        return true;
+    }
+    WriteF = CreateFile(fileWide,
+        GENERIC_WRITE,
+        FILE_SHARE_WRITE,
+        NULL,
+        CREATE_ALWAYS,
+        FILE_ATTRIBUTE_NORMAL,
+        NULL);
+    if (WriteF == INVALID_HANDLE_VALUE) {
+        cout << "Error out file: ";
+        cout << "Error: " << GetLastErrorAsString() << endl;
+        return true;
+    }
+
+    return false;
+}
+
 int main()
 {
     string input = "";
@@ -67,23 +178,14 @@ int main()
 
     int Error = 0;
     SYSTEM_INFO siSysInfo;
-
-    ifstream fileANSII("ansii.txt");
-    ifstream fileF("wide.txt");
-    wofstream  fileWide("wide.txt");
     
-    string line;
-    wstring lineForWide;
-
     switch (str2int(input.c_str()))
     {
     case str2int("-e"):
 
         ShellExecuteA(NULL, NULL, "C:\\AbraKadabra.exe", NULL, NULL, SW_SHOWNORMAL);
-
-        Error = GetLastError();
-
-        cout << "Error = " << GetLastErrorAsString() << "\n";
+        
+        cout << "Error: " << GetLastErrorAsString() << "\n";
 
         break;
     default:
@@ -105,20 +207,16 @@ int main()
             siSysInfo.dwActiveProcessorMask);
         break;
     case str2int("-a"):
-        while (getline(fileANSII, line))
+        if (!CreateFileForWork())
         {
-            wstring temp = L"";
-            temp = ConvertAnsiToWide(line);
-
-            if (temp != L"")
-            {
-                fileWide << temp << endl;
-            }
+            UnicodeToANSI(ReadF, WriteF);
         }
         break;
     case str2int("-u"):
-        lineForWide = readFile("wide.txt");
-        wcout << lineForWide;
+        if (!CreateFileForWork())
+        {
+            ANSIToUnicode(ReadF, WriteF);
+        }
         break;
     }
     
