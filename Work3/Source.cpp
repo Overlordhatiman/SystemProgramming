@@ -6,12 +6,15 @@
 
 #define _CRT_SECURE_NO_WARNINGS
 
+#define MAX_KEY 255
+#define MAX_VALUE 16383
+
 using namespace std;
 
 typedef struct {
-	TCHAR    subkeyName[255];
+	TCHAR    subkeyName[MAX_KEY];
 	DWORD    sizeOfString;
-	TCHAR    className[260] = TEXT("");
+	TCHAR    className[MAX_PATH] = TEXT("");
 	DWORD    classString = MAX_PATH;
 	DWORD    numberOfSubkeys = 0;
 	DWORD    maxSize;
@@ -42,7 +45,7 @@ bool FindInReg(HKEY hKey, LPCWSTR reqStr, LPWSTR fullPath)
 	{
 		for (int i = 0; i < keyInfo.numberOfSubkeys; i++)
 		{
-			keyInfo.sizeOfString = 255;
+			keyInfo.sizeOfString = MAX_KEY;
 			retCode = RegEnumKeyEx(hKey, i, keyInfo.subkeyName, &keyInfo.sizeOfString, NULL, NULL, NULL, NULL);
 			if (retCode == ERROR_SUCCESS)
 			{
@@ -51,7 +54,7 @@ bool FindInReg(HKEY hKey, LPCWSTR reqStr, LPWSTR fullPath)
 					std::cout << "FOUND: " << fullPath << "\\" << keyInfo.subkeyName << endl;
 				}
 
-				newSubkeyPath = (LPWSTR)malloc(16383 * sizeof(TCHAR));
+				newSubkeyPath = (LPWSTR)malloc(MAX_VALUE * sizeof(TCHAR));
 				lstrcpy(newSubkeyPath, fullPath);
 				lstrcat(newSubkeyPath, L"\\");
 				lstrcat(newSubkeyPath, keyInfo.subkeyName);
@@ -263,7 +266,7 @@ void PrintSubkey(HKEY key)
 		std::cout << "\tCount:" << keyInfo.numberOfSubkeys << endl;
 		for (int i = 0; i < keyInfo.numberOfSubkeys; i++)
 		{
-			keyInfo.sizeOfString = 16383;
+			keyInfo.sizeOfString = MAX_VALUE;
 			retCode = RegEnumKeyEx(key, i, keyInfo.subkeyName, &keyInfo.sizeOfString, NULL, NULL, NULL, NULL);
 			if (retCode == ERROR_SUCCESS)
 			{
@@ -358,10 +361,10 @@ bool OpenKey(HKEY** hKey, DWORD dwOpenAccess, LPWSTR fullPath)
 		return false;
 	}
 
-	CHAR keyArr[255] = { '\0' };
+	CHAR keyArr[MAX_KEY] = { '\0' };
 	LPCWSTR key = (LPCWSTR)keyArr;
 	std::cout << "Path to subkey:\n";
-	MyReadString((CHAR*)key, 255, true);
+	MyReadString((CHAR*)key, MAX_KEY, true);
 
 	if (RegOpenKeyEx(predKey, key, 0, dwOpenAccess, *hKey) == ERROR_SUCCESS)
 	{
