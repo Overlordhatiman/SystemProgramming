@@ -9,6 +9,19 @@
 #define MAX_KEY 255
 #define MAX_VALUE 16383
 
+#define CLASSES_ROOT 1
+#define CURRENT_USER 2
+#define LOCAL_MACHINE 3
+#define USERS 4
+#define CURRENT_CONFIG 5
+#define PERFORMANCE_DATA 6
+
+const char PRINT_SUBKEYS = 'a';
+const char PRINT_KEYS = 'b';
+const char SEARCH = 'c';
+const char SAVE = 'd';
+const char EXIT = 'e';
+
 using namespace std;
 
 typedef struct {
@@ -327,32 +340,32 @@ bool OpenKey(HKEY** hKey, DWORD dwOpenAccess, LPWSTR fullPath)
 
 	switch (choice)
 	{
-	case 1:
+	case CLASSES_ROOT:
 	{
 		predKey = HKEY_CLASSES_ROOT;
 		if (fullPath != NULL) lstrcpy(fullPath, L"HKEY_CLASSES_ROOT\\");
 	} break;
-	case 2:
+	case CURRENT_USER:
 	{
 		predKey = HKEY_CURRENT_USER;
 		if (fullPath != NULL) lstrcpy(fullPath, L"HKEY_CURRENT_USER\\");
 	} break;
-	case 3:
+	case LOCAL_MACHINE:
 	{
 		predKey = HKEY_LOCAL_MACHINE;
 		if (fullPath != NULL) lstrcpy(fullPath, L"HKEY_LOCAL_MACHINE\\");
 	} break;
-	case 4:
+	case USERS:
 	{
 		predKey = HKEY_USERS;
 		if (fullPath != NULL) lstrcpy(fullPath, L"HKEY_USERS\\");
 	} break;
-	case 5:
+	case CURRENT_CONFIG:
 	{
 		predKey = HKEY_CURRENT_CONFIG;
 		if (fullPath != NULL) lstrcpy(fullPath, L"HKEY_CURRENT_CONFIG\\");
 	} break;
-	case 6:
+	case PERFORMANCE_DATA:
 	{
 		predKey = HKEY_PERFORMANCE_DATA;
 		if (fullPath != NULL) lstrcpy(fullPath, L"HKEY_PERFORMANCE_DATA\\");
@@ -396,21 +409,21 @@ int main()
 		cin >> choice;
 		switch (choice)
 		{
-		case 'a':
+		case PRINT_SUBKEYS:
 		{
 			if (OpenKey(&phKey, KEY_READ, NULL) == true)
 			{
 				PrintSubkey(hKey);
 			}
 		}break;
-		case 'b':
+		case PRINT_KEYS:
 		{
 			if (OpenKey(&phKey, KEY_QUERY_VALUE, NULL) == true)
 			{
 				PrintParams(hKey);
 			}
 		} break;
-		case 'c':
+		case SEARCH:
 		{
 			CHAR fullPath[MAX_PATH];
 			if (OpenKey(&phKey, KEY_ALL_ACCESS, (LPWSTR)fullPath) == true)
@@ -421,7 +434,7 @@ int main()
 				FindInReg(hKey, (LPCWSTR)reqString, (LPWSTR)fullPath);
 			}
 		} break;
-		case 'd':
+		case SAVE:
 		{
 			HANDLE hToken;
 
@@ -439,7 +452,7 @@ int main()
 				}
 			}
 		} break;
-		case 'e':
+		case EXIT:
 		{
 			return 1;
 		} break;
