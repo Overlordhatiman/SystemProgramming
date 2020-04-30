@@ -1,0 +1,2 @@
+Thread 0 made this in 1.000000 seconds
+Thread 1 made this in 10.000000 seconds
