@@ -1,4 +1,12 @@
 ﻿#define _CRT_SECURE_NO_WARNINGS
+
+#define SetDir 0
+#define PrintDir 1
+#define CopyF 2
+#define MakeDir 3
+#define MoreInfo 4
+#define DeleteF 5
+
 #include <windows.h>;
 #include <iostream>
 #include <locale.h>
@@ -175,22 +183,22 @@ int main() {
 		cin >> choice;
 
 		switch (choice) {
-		case 0:
+		case SetDir:
 			SetDirectory(buffer);
 			break;
-		case 1:
+		case PrintDir:
 			PrintDirectory(buffer);
 			break;
-		case 2:
+		case CopyF:
 			CopyFileInCurDir(buffer);
 			break;
-		case 3: 
+		case MakeDir: 
 			MyCreateDirectory(buffer);
 			break;
-		case 4: 
+		case MoreInfo: 
 			FullInformation(buffer);
 			break;
-		case 5: 
+		case DeleteF: 
 			MyDelete(buffer);
 			break;
 		}

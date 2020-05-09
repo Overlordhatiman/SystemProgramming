@@ -1,4 +1,11 @@
 ﻿#define _CRT_SECURE_NO_WARNINGS
+
+#define ChangeRecord 1
+#define DeleteRecord 2
+#define AddRecord 3
+#define ReadAll 4
+#define Exit 0
+
 #include <iostream>
 #include <windows.h>
 #include <vector>
@@ -189,19 +196,19 @@ int main() {
 		cout << "Your choice: ";
 		cin >> key;
 		switch (key) {
-		case 0: 
+		case Exit: 
 			exit(EXIT_SUCCESS);
 			break;
-		case 1:
+		case ChangeRecord:
 			Change_rec();
 			break;
-		case 2:
+		case DeleteRecord:
 			delete_rec();
 			break;
-		case 3:
+		case AddRecord:
 			Add_rec();
 			break;
-		case 4:
+		case ReadAll:
 			PrintAllInformation();
 			break;
 		default: 

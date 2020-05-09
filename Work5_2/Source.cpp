@@ -74,8 +74,8 @@ int main()
     for (int i = 0; i < max_threads; i++)
     {
         int* params = new int[2];
-        params[0] = i;
-        params[1] = random_int(1, 10);
+        params[NumberOfThread] = i;
+        params[TimeToSleep] = random_int(1, 10);
 
         threads[i] = CreateThread(NULL, 0, thread_function, (LPVOID)params, NULL, NULL);
     }

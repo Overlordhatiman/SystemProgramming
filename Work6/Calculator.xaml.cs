@@ -17,6 +17,13 @@ using Windows.UI.Xaml.Navigation;
 
 namespace Lab6_UWP
 {
+    static class Constants
+    {
+        public const int LENGTH = 0;
+        public const int WEIGHT = 1;
+        public const int SIZE = 2;
+
+    }
     /// <summary>
     /// Пустая страница, которую можно использовать саму по себе или для перехода внутри фрейма.
     /// </summary>
@@ -45,17 +52,17 @@ namespace Lab6_UWP
 
             switch (Operations.SelectedIndex)
             {
-                case 0:
+                case Constants.LENGTH:
                     Result1.Text = (a / 3.281).ToString();
                     Result2.Text = (a * 39.37).ToString();
                     Result3.Text = (a * 1.094).ToString();
                     Result4.Text = (a / (double)1609).ToString();
                     break;
-                case 1:
+                case Constants.WEIGHT:
                     Result1.Text = (a * 2.205).ToString();
                     Result2.Text = (a * 35.274).ToString();
                     break;
-                case 2:
+                case Constants.SIZE:
                     Result1.Text = (a * 2.103).ToString();
                     Result2.Text = (a / 3.785).ToString();
                     break;
@@ -74,7 +81,7 @@ namespace Lab6_UWP
 
                 switch (Operations.SelectedIndex)
                 {
-                    case 0:
+                    case Constants.LENGTH:
                         Input.Text = "Метры";
                         ResultText1.Text = "Фут";
                         ResultText2.Text = "Дюйм";
@@ -83,14 +90,14 @@ namespace Lab6_UWP
                         ResultText3.Visibility = Visibility.Visible;
                         ResultText4.Visibility = Visibility.Visible;
                         break;
-                    case 1:
+                    case Constants.WEIGHT:
                         Input.Text = "Кг";
                         ResultText1.Text = "Фунты";
                         ResultText2.Text = "Унции";
                         ResultText3.Visibility = Visibility.Collapsed;
                         ResultText4.Visibility = Visibility.Collapsed;
                         break;
-                    case 2:
+                    case Constants.SIZE:
                         Input.Text = "Литры";
                         ResultText1.Text = "Пинты";
                         ResultText2.Text = "Галлоны";
